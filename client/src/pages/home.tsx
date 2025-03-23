@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Check, XCircle, Loader2 } from "lucide-react";
+import { Check, XCircle, Loader2, Trees } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ export default function Home() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      number: undefined,
+      number: 0,
       name: "",
     },
   });
@@ -77,7 +77,10 @@ export default function Home() {
     },
     onSuccess: () => {
       // Clear form
-      form.reset();
+      form.reset({
+        number: 0,
+        name: "",
+      });
       
       // Show success message
       setShowSuccess(true);
@@ -131,14 +134,21 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md">
         <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Blob Tree Hasmo</h1>
-          <p className="text-gray-600">Enter your number and name to submit to the cloud</p>
+          <div className="flex justify-center mb-3">
+            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Trees className="h-6 w-6 text-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Blob Tree Hasmo
+          </h1>
+          <p className="text-gray-600">Enter your number and select your name</p>
         </header>
 
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-md border-0">
           <CardContent className="pt-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -147,12 +157,13 @@ export default function Home() {
                   name="number"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-gray-700">Number</FormLabel>
+                      <FormLabel className="text-gray-700 font-medium">Your Number</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="Enter a number"
                           min="0"
+                          className="focus:ring-2 focus:ring-blue-500"
                           {...field}
                         />
                       </FormControl>
@@ -166,14 +177,14 @@ export default function Home() {
                   name="name"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-gray-700">Name</FormLabel>
+                      <FormLabel className="text-gray-700 font-medium">Your Name</FormLabel>
                       <Select 
                         disabled={isLoadingNames} 
                         onValueChange={field.onChange} 
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="focus:ring-2 focus:ring-blue-500">
                             <SelectValue placeholder="Select your name" />
                           </SelectTrigger>
                         </FormControl>
@@ -192,16 +203,16 @@ export default function Home() {
 
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2" 
                   disabled={createSubmission.isPending}
                 >
                   {createSubmission.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
+                      Saving...
                     </>
                   ) : (
-                    "Submit to Cloud"
+                    "Save Entry"
                   )}
                 </Button>
               </form>
@@ -210,14 +221,14 @@ export default function Home() {
         </Card>
 
         {showSuccess && (
-          <div className="bg-green-50 border border-success rounded-md p-4 mb-6">
+          <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6 shadow-sm">
             <div className="flex">
               <div className="flex-shrink-0">
                 <Check className="h-5 w-5 text-green-500" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-500">
-                  Successfully submitted to the cloud!
+                <p className="text-sm font-medium text-green-600">
+                  Your entry has been saved successfully!
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -237,32 +248,34 @@ export default function Home() {
           </div>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-gray-800">Recent Submissions</CardTitle>
+        <Card className="shadow-md border-0">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium text-gray-800">
+              Recent Entries
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {isLoadingSubmissions ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <div className="flex justify-center py-6">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                 </div>
               ) : submissions.length === 0 ? (
-                <div className="py-4 text-center text-gray-500">
-                  <p>No submissions yet. Be the first to submit!</p>
+                <div className="py-6 text-center text-gray-500">
+                  <p>No entries yet. Be the first to add one!</p>
                 </div>
               ) : (
                 submissions.map((submission) => (
                   <div 
                     key={submission.id} 
-                    className="border border-gray-200 rounded-md p-3 flex justify-between items-center bg-gray-50"
+                    className="border border-gray-200 rounded-lg p-4 flex justify-between items-center hover:bg-blue-50 transition-colors"
                   >
                     <div>
-                      <span className="font-medium text-gray-700">{submission.name}</span>
+                      <span className="font-medium text-gray-800">{submission.name}</span>
                       <span className="text-gray-400 mx-2">•</span>
-                      <span className="text-gray-600">{submission.number}</span>
+                      <span className="text-blue-600 font-medium">{submission.number}</span>
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {formatTimestamp(submission.createdAt)}
                     </div>
                   </div>
@@ -273,7 +286,7 @@ export default function Home() {
         </Card>
 
         <footer className="mt-8 text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} Blob Tree Hasmo. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Blob Tree Hasmo</p>
         </footer>
       </div>
     </div>
