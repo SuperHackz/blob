@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Your Name and Number</title>
+  <style>
+    body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
+    input { margin: 10px; padding: 8px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Enter Your Name and Number</h1>
+  
+  <!-- Form to collect user data -->
+  <form id="submissionForm">
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="text" id="number" placeholder="Number" required />
+    <button type="submit">Save</button>
+  </form>
+
+  <h2>Submissions</h2>
+  <ul id="submissionsList"></ul>
+
+  <script>
+    const form = document.getElementById("submissionForm");
+    const nameInput = document.getElementById("name");
+    const numberInput = document.getElementById("number");
+    const submissionsList = document.getElementById("submissionsList");
+
+    // Fetch existing submissions
+    const fetchSubmissions = async () => {
+      const response = await fetch("/api/save");
+      const data = await response.json();
+      renderSubmissions(data);
+    };
+
+    // Render the list of submissions
+    const renderSubmissions = (submissions) => {
+      submissionsList.innerHTML = '';
+      submissions.forEach((submission) => {
+        const li = document.createElement('li');
+        li.textContent = `${submission.name} - ${submission.number}`;
+        submissionsList.appendChild(li);
+      });
+    };
+
+    // Handle form submission
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = nameInput.value;
+      const number = numberInput.value;
+
+      await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, number })
+      });
+
+      nameInput.value = "";
+      numberInput.value = "";
+      fetchSubmissions();  // Refresh the list of submissions
+    });
+
+    // Initial fetch
+    fetchSubmissions();
+  </script>
+</body>
+</html>
